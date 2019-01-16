@@ -1,7 +1,7 @@
 
 var express = require('express');
 var bodyparser = require('body-parser');
-var {objectId} = require('body-parser');
+var {ObjectID} = require('mongodb');
 
 var {mongoose} = require ('./db/mongoose');
 var {Todo} = require('./models/todo')
@@ -35,7 +35,7 @@ app.get('/todos', (req, res)=>{
 app.get('/todos/:id', (req, res)=>{
   var id = req.params.id;
 
-  if (!objectId.isValid(id)) {
+  if (!ObjectID.isValid(id)) {
      return res.status(404).send();
   }
   Todo.findById(id).then((todo)=>{
@@ -47,6 +47,26 @@ app.get('/todos/:id', (req, res)=>{
   }).catch((e)=> {
     res.status(400).send();
   });
+});
+
+app.delete('/todos/:id', (req, res)=>{
+  //gets the ide
+  var id = req.params.id;
+  //validates the id , if not valid return 404
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send();
+  }
+
+  //removes the todo by id
+  Todo.findByIdAndRemove(id).then((todo) =>{
+    if (!todo) {
+      return res.status(404).send()
+    }
+    res.send(todo);
+  }).catch((e)=>{
+    res.status(400).send();
+  });
+
 });
 
 app.listen(port, ()=> {
